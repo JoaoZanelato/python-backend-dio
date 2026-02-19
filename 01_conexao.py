@@ -1,15 +1,17 @@
 import sqlite3
-from tkinter.tix import INTEGER
+from pathlib import Path
 
-con = sqlite3.connect('banco.sqlite')
+ROOT_PATH = Path(__file__).parent
+con = sqlite3.connect(ROOT_PATH / 'banco.sqlite')
 cursor = con.cursor()
 
 def criar_tabela(con, cursor):
-    cursor.execute('''CREATE IF NOT EXISTS TABLE clientes (
+    cursor.execute('''CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(100),
     email VARCHAR(150)
     )''')
+    con.commit()
     
 def inserir_cliente(con, cursor, nome, email):
     data = (nome, email)
@@ -23,9 +25,24 @@ def update_cliente(con, cursor, id, nome, email):
     con.commit()
 
 def excluir_cliente(con, cursor, id):
-    data = (id,)
+    data = (id,) 
     cursor.execute('''DELETE FROM clientes WHERE id=?''', data)
     con.commit()
-    
-excluir_cliente(con, cursor, 1)
 
+def inserir_muitos(con, cursor, dados):
+    cursor.executemany("INSERT INTO clientes (nome, email) values (?,?)", dados)
+    con.commit()
+
+def recuperar_cliente_por_id(cursor, id):
+    cursor.execute("SELECT * FROM clientes WHERE id = ?", (id,))
+    return cursor.fetchone()
+
+def listar_clientes(cursor):
+    return cursor.execute('SELECT * FROM clientes ORDER BY nome')
+
+cliente = recuperar_cliente_por_id(cursor, 4)
+print(cliente)
+
+clientes = listar_clientes(cursor)
+for cliente in clientes:
+    print(cliente)
