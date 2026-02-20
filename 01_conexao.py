@@ -1,9 +1,11 @@
 import sqlite3
 from pathlib import Path
 
-ROOT_PATH = Path(__file__).parent
-con = sqlite3.connect(ROOT_PATH / 'banco.sqlite')
-cursor = con.cursor()
+ROOT_PATH = Path(__file__).parent # Caminho da pasta onde está o arquivo
+
+con = sqlite3.connect(ROOT_PATH / 'banco.sqlite') #Cria o banco na pasta do arquivo
+cursor = con.cursor() 
+cursor.row_factory = sqlite3.Row # Ocorre Globalmente no Arquivo
 
 def criar_tabela(con, cursor):
     cursor.execute('''CREATE TABLE IF NOT EXISTS clientes (
@@ -35,7 +37,7 @@ def inserir_muitos(con, cursor, dados):
 
 def recuperar_cliente_por_id(cursor, id):
     cursor.execute("SELECT * FROM clientes WHERE id = ?", (id,))
-    return cursor.fetchone()
+    return dict(cursor.fetchone())
 
 def listar_clientes(cursor):
     return cursor.execute('SELECT * FROM clientes ORDER BY nome')
@@ -45,4 +47,5 @@ print(cliente)
 
 clientes = listar_clientes(cursor)
 for cliente in clientes:
-    print(cliente)
+    print(dict(cliente))
+    print(cliente['id'])
